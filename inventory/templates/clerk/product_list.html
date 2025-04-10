@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Custom Styles for Products Page */
+    .table-hover tbody tr:hover {
+        background-color: #f8fafc;
+        transition: all 0.3s ease-in-out;
+        transform: scale(1.01);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-input {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .filter-input:focus {
+        --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+        --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+        box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        --tw-ring-color: #3b82f6;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(to right, #3b82f6, #2563eb);
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease-in-out;
+        transform: hover:scale(1.05);
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(to right, #2563eb, #1d4ed8);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+</style>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+            <h2 class="text-4xl font-bold text-center">
+                Product Inventory
+            </h2>
+            <p class="text-center text-blue-100 mt-2">
+                Comprehensive view of pharmaceutical products
+            </p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="p-6 bg-gray-50 border-b">
+            <form method="post" class="grid md:grid-cols-3 gap-4" id="filter-form">
+                {% csrf_token %}
+                <!-- Search Input Container -->
+                <div class="relative">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Search Products
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <div class="relative flex-grow">
+                            <input 
+                                type="text" 
+                                name="search" 
+                                id="searchInput"
+                                placeholder="Search products..."
+                                class="filter-input w-full px-4 py-3 rounded-lg border focus:outline-none"
+                                value="{{ search }}"
+                            >
+                        </div>
+                        <button type="submit" class="text-gray-400 hover:text-blue-500 cursor-pointer">
+                            <i class="fas fa-search text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Filter by Category
+                    </label>
+                    <select 
+                        name="category_filter" 
+                        class="filter-input w-full px-4 py-3 rounded-lg border focus:outline-none"
+                        onchange="document.getElementById('filter-form').submit();"
+                    >
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                            <option 
+                                value="{{ category }}" 
+                                {% if category_filter == category %}selected{% endif %}
+                            >
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+
+        <!-- Product Table -->
+        {% if products %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Product Name</th>
+                            <th class="px-4 py-2 text-left">Batch No</th>
+                            <th class="px-4 py-2 text-center">Quantity</th>
+                            <th class="px-4 py-2 text-center">Expiry Date</th>
+                            <th class="px-4 py-2 text-right">Price</th>
+                            <th class="px-4 py-2 text-left">Category</th>
+                            <th class="px-4 py-2 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr class="hover:bg-blue-50 border-b">
+                                <td class="px-4 py-2 text-left">{{ product.product_name }}</td>
+                                <td class="px-4 py-2 text-left">{{ product.batch_no }}</td>
+                                <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+                                <td class="px-4 py-2 text-center">{{ product.expiry_date }}</td>
+                                <td class="px-4 py-2 text-right">${{ product.price }}</td>
+                                <td class="px-4 py-2 text-left">{{ product.category }}</td>
+                                <td class="px-4 py-2 text-center">
+                                    <a href="#" 
+                                       class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded inline-block">
+                                        <i class="fas fa-edit"></i> Update
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center p-12 animate-fade-in">
+                <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-2">
+                    No Products Found
+                </h3>
+                <p class="text-gray-500">
+                    Try adjusting your search or filter criteria
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add any JavaScript functionality here if needed
+});
+</script>
+{% endblock %}

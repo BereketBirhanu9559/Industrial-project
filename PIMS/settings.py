@@ -50,6 +50,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+'''AUTHENTICATION_BACKENDS = [
+    'inventory.backends.RoleBasedAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]'''
+
 ROOT_URLCONF = 'PIMS.urls'
 
 TEMPLATES = [
@@ -121,3 +126,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+#AUTH_USER_MODEL = 'inventory.User'  # Replace 'yourapp' with your app name
+AUTH_USER_MODEL = 'inventory.User'  # replace 'your_app' with your actual app name
