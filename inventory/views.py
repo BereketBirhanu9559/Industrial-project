@@ -1,16 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth import login as auth_login, logout
 from django.contrib import messages
 from django.contrib.auth import authenticate
-from .forms import LoginForm,InventoryRegistrationForm
+from .forms import LoginForm,InventoryRegistrationForm,ShelfLocationForm
 from django.db.models import Q
 from .models import UserProfile,Inventory
 
 
 
-@login_required
 def index(request):
     user = request.user
 
@@ -104,6 +103,22 @@ def product_list(request):
     }
     return render(request, 'clerk/product_list.html', context)
 
+def update_shelf_location(request, product_id):
+    product = get_object_or_404(Inventory, id=product_id)
+    
+    if request.method == 'POST':
+        form = ShelfLocationForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Shelf location updated successfully!")
+            return redirect('product_list')
+    else:
+        form = ShelfLocationForm(instance=product)
+    
+    return render(request, 'clerk/update_shelf_location.html', {
+        'product': product,
+        'form': form
+    })
 
 @login_required
 def logout_view(request):

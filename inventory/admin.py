@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import User, UserProfile,Inventory
+from customer.models import Customer
+
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
@@ -77,21 +79,21 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
     # Fields to display in the list view
-    list_display = ('product_name', 'batch_no', 'quantity', 'expiry_date', 'price', 'category', 'created_at')
+    list_display = ('product_name', 'batch_no', 'quantity', 'expiry_date', 'price', 'category', 'shelf_location', 'created_at')
     
     # Enable filtering by these fields
-    list_filter = ('category', 'expiry_date', 'created_at')
+    list_filter = ('category', 'expiry_date', 'created_at', 'shelf_location')
     
     # Enable search functionality for these fields
-    search_fields = ('product_name', 'batch_no', 'category')
+    search_fields = ('product_name', 'batch_no', 'category', 'shelf_location')
     
     # Fields that can be edited directly in the list view
-    list_editable = ('quantity', 'price')
+    list_editable = ('quantity', 'price', 'shelf_location')
     
     # Fields to group in the edit form
     fieldsets = (
         ('Product Information', {
-            'fields': ('product_name', 'batch_no', 'category')
+            'fields': ('product_name', 'batch_no', 'category', 'shelf_location')
         }),
         ('Stock Information', {
             'fields': ('quantity', 'price', 'expiry_date')
@@ -101,32 +103,5 @@ class InventoryAdmin(admin.ModelAdmin):
     # Date-based navigation/hierarchy
     date_hierarchy = 'expiry_date'
     
-    # Automatic slug generation (if you had a slug field)
-    # prepopulated_fields = {'slug': ('product_name',)}
-    
     # Custom ordering
     ordering = ('-created_at',)
-    # Add this to your InventoryAdmin class if you want more features:
-
-# To show a custom column
-def remaining_days(self, obj):
-    from django.utils import timezone
-    remaining = (obj.expiry_date - timezone.now().date()).days
-    return remaining if remaining > 0 else "Expired"
-remaining_days.short_description = "Days Until Expiry"
-
-# Then add it to list_display
-list_display = (..., 'remaining_days')
-
-# To customize the display of empty values
-empty_value_display = '-empty-'
-
-# To set the number of items per page
-list_per_page = 50
-
-# To add actions
-actions = ['mark_as_expired']
-
-def mark_as_expired(self, request, queryset):
-    queryset.update(quantity=0)
-mark_as_expired.short_description = "Mark selected items as expired (quantity=0)"

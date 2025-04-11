@@ -2,15 +2,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
-from .models import UserProfile
 from django.contrib.auth.hashers import check_password
-
-from django import forms
-from django.contrib.auth.forms import AuthenticationForm
-from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import check_password
-from .models import UserProfile
+from .models import UserProfile,Inventory
 
 class LoginForm(AuthenticationForm):
     role = forms.ChoiceField(
@@ -87,9 +80,7 @@ class LoginForm(AuthenticationForm):
             self.user_cache = user
         
         return cleaned_data
-    
-from django import forms
-from .models import Inventory
+
 
 class InventoryRegistrationForm(forms.ModelForm):
     CATEGORY_CHOICES = [
@@ -120,3 +111,19 @@ class InventoryRegistrationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'input-field w-full px-4 py-3 rounded-lg border focus:outline-none'})
+
+class ShelfLocationForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = ['shelf_location']
+        widgets = {
+            'shelf_location': forms.TextInput(attrs={
+                'class': 'shadow-md appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-400',
+                'placeholder': 'Enter new shelf location',
+                'required': True
+            })
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['shelf_location'].label = "New Shelf Location"

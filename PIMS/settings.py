@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'inventory'
+    'customer.apps.CustomerConfig',
+    'inventory.apps.InventoryConfig',
 ]
 
 MIDDLEWARE = [
@@ -50,10 +51,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-'''AUTHENTICATION_BACKENDS = [
-    'inventory.backends.RoleBasedAuthBackend',
+AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-]'''
+    'customer.backends.CustomerBackend',
+]
 
 ROOT_URLCONF = 'PIMS.urls'
 
@@ -128,3 +129,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #AUTH_USER_MODEL = 'inventory.User'  # Replace 'yourapp' with your app name
 AUTH_USER_MODEL = 'inventory.User'  # replace 'your_app' with your actual app name
+

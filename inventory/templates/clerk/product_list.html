@@ -110,39 +110,53 @@
 
         <!-- Product Table -->
         {% if products %}
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-blue-600 text-white">
-                        <tr>
-                            <th class="px-4 py-2 text-left">Product Name</th>
-                            <th class="px-4 py-2 text-left">Batch No</th>
-                            <th class="px-4 py-2 text-center">Quantity</th>
-                            <th class="px-4 py-2 text-center">Expiry Date</th>
-                            <th class="px-4 py-2 text-right">Price</th>
-                            <th class="px-4 py-2 text-left">Category</th>
-                            <th class="px-4 py-2 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in products %}
-                            <tr class="hover:bg-blue-50 border-b">
-                                <td class="px-4 py-2 text-left">{{ product.product_name }}</td>
-                                <td class="px-4 py-2 text-left">{{ product.batch_no }}</td>
-                                <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
-                                <td class="px-4 py-2 text-center">{{ product.expiry_date }}</td>
-                                <td class="px-4 py-2 text-right">${{ product.price }}</td>
-                                <td class="px-4 py-2 text-left">{{ product.category }}</td>
-                                <td class="px-4 py-2 text-center">
-                                    <a href="#" 
-                                       class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded inline-block">
-                                        <i class="fas fa-edit"></i> Update
-                                    </a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<div class="overflow-x-auto">
+    <table class="w-full">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="px-4 py-2 text-left">Product Name</th>
+                <th class="px-4 py-2 text-left">Batch No</th>
+                <th class="px-4 py-2 text-center">Quantity</th>
+                <th class="px-4 py-2 text-center">Expiry Date</th>
+                <th class="px-4 py-2 text-right">Price</th>
+                <th class="px-4 py-2 text-left">Category</th>
+                <th class="px-4 py-2 text-left">Shelf Location</th>  <!-- New column -->
+                <th class="px-4 py-2 text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+                <tr class="hover:bg-blue-50 border-b">
+                    <td class="px-4 py-2 text-left">{{ product.product_name }}</td>
+                    <td class="px-4 py-2 text-left">{{ product.batch_no }}</td>
+                    <td class="px-4 py-2 text-center">{{ product.quantity }}</td>
+                    <td class="px-4 py-2 text-center">{{ product.expiry_date }}</td>
+                    <td class="px-4 py-2 text-right">${{ product.price }}</td>
+                    <td class="px-4 py-2 text-left">{{ product.category }}</td>
+                    <td class="px-4 py-2 text-left">
+                        {% if product.shelf_location %}
+                            {{ product.shelf_location }}
+                        {% else %}
+                            <span class="text-gray-400">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                        <div class="flex space-x-2 justify-center">
+                            <a href="#" 
+                               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded inline-block text-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'update_shelf_location' product.id %}" 
+                               class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded inline-block text-sm">
+                                <i class="fas fa-map-marker-alt"></i> Location
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
         {% else %}
             <div class="text-center p-12 animate-fade-in">
                 <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>

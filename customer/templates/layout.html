@@ -1,0 +1,203 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ALETIA Healthcare Solutions{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #3182ce;
+            --secondary-color: #2c5282;
+            --accent-color: #4299e1;
+            --text-color: #2d3748;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+        }
+
+        /* Gradient Background with Subtle Animation */
+        .gradient-bg {
+            background: linear-gradient(135deg,
+                    var(--primary-color),
+                    var(--secondary-color));
+            background-size: 200% 200%;
+            animation: gradientFlow 10s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% {
+                background-position: 0% 50%;
+            }
+ 
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glassmorphism Effect */
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced Navigation Links */
+        .nav-link {
+            @apply relative text-white px-3 py-2 rounded-lg transition-all duration-300 ease-in-out transform hover:bg-white hover:bg-opacity-20 hover:scale-105 hover:shadow-lg;
+        }
+
+        .mobile-nav-link {
+            @apply w-full text-center py-4 hover:bg-blue-700 transition-colors font-semibold;
+        }
+
+        /* Hover Effects */
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-50">
+    <!-- Advanced Responsive Header -->
+    <header class="sticky top-0 z-50 gradient-bg text-white py-4 shadow-2xl">
+        <div class="container mx-auto px-4 flex justify-between items-center relative">
+            <!-- Logo with Modern Typography -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-500 p-3 rounded-full shadow-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        <path d="M9 17l3-8 3 8" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-wider text-white">
+                        ALETIA
+                    </h1>
+                    <p class="text-xs text-blue-200 tracking-wide">
+                        Healthcare Solutions
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="md:hidden">
+                <button id="mobile-menu-toggle" class="focus:outline-none">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Desktop Navigation with Modern Styling -->
+            <nav class="hidden md:block">
+                <ul class="flex space-x-6 items-center">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'home' %}" class="nav-link">Home</a></li>
+                        <li><a href="#" class="nav-link">Products</a></li>
+                        <li><a href="#" class="nav-link">
+                                <i class="fas fa-shopping-cart mr-2"></i>Cart
+                            </a></li>
+                        <li>
+                            <a href="{% url 'customer_logout' %}" class="bg-red-500 hover:bg-red-600 
+                               px-4 py-2 rounded-full transition-colors">
+                                Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'home' %}" class="nav-link">Home</a></li>
+                        <li><a href="#" class="nav-link">Sign Up</a></li>
+                        <li>
+                            <a href="#" class="bg-white bg-opacity-20 
+                               hover:bg-opacity-30 px-4 py-2 rounded-full transition-colors">
+                                Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- Mobile Dropdown Menu with Glassmorphism -->
+            <div id="mobile-menu" class="absolute top-full left-0 w-full glass-morphism md:hidden hidden">
+                <ul class="flex flex-col items-center py-4 space-y-2">
+                    {% if user.is_authenticated %}
+                        <li class="w-full"><a href="{% url 'home' %}" class="mobile-nav-link block">Home</a></li>
+                        <li class="w-full"><a href="#" class="mobile-nav-link block">Products</a></li>
+                        <li class="w-full"><a href="#" class="mobile-nav-link block">Cart</a></li>
+                        <li class="w-full"><a href="#" class="mobile-nav-link block text-red-300">Logout</a></li>
+                    {% else %}
+                        <li class="w-full"><a href="{% url 'home' %}" class="mobile-nav-link block">Home</a></li>
+                        <li class="w-full"><a href="#" class="mobile-nav-link block">Sign Up</a></li>
+                        <li class="w-full"><a href="#" class="mobile-nav-link block">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area with Subtle Padding -->
+    <main class="flex-1 container mx-auto px-4 py-8 bg-gray-50">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Modern Footer with Social Icons -->
+    <footer class="gradient-bg text-white py-3">
+        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-4 items-center">
+            <!-- Brand Section -->
+            <div class="text-center md:text-left">
+                <h3 class="text-lg font-semibold">ALETIA</h3>
+            </div>
+            <!-- Copyright -->
+            <div class="text-center text-gray-300 text-sm mt-2 border-t border-blue-700 pt-2">
+                &copy; {% now "Y" %} Pharma Hub. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle with Enhanced Interactivity
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenuToggle.classList.toggle('rotate-90');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!mobileMenu.contains(event.target) &&
+                !mobileMenuToggle.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
