@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load math_filters %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <h1 class="text-2xl font-bold text-white">
+                    <i class="fas fa-edit mr-2"></i>
+                    Update Pharmacy Loan
+                </h1>
+                <p class="text-blue-100 mt-1">
+                    {{ loan.inventory.product_name }} - Batch {{ loan.inventory.batch_no }}
+                </p>
+            </div>
+
+            <div class="p-6">
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="font-medium text-gray-800 mb-2">Current Loan Details</h3>
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600">Pharmacy:</p>
+                            <p class="font-medium">{{ loan.pharmacy_name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Loaned:</p>
+                            <p class="font-medium">{{ loan.quantity_loaned }} on {{ loan.loan_date|date:"Y-m-d" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Status:</p>
+                            <p class="font-medium">{{ loan.get_status_display }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-4">
+                        <!-- Status Field -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                            {% render_field form.status class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %}
+                            {% if form.status.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.status.errors|join:", " }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Quantity Sold -->
+                        <div id="sold-field" class="{% if loan.status == 'returned' %}hidden{% endif %}">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity Sold</label>
+                            {% render_field form.quantity_sold class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" min="0" %}
+                            {% if form.quantity_sold.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.quantity_sold.errors|join:", " }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">
+                                Max: {{ max_sold }}
+                            </p>                            
+                        </div>
+
+                        <!-- Quantity Returned -->
+                        <div id="returned-field" class="{% if loan.status == 'sold' %}hidden{% endif %}">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity Returned</label>
+                            {% render_field form.quantity_returned class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" min="0" %}
+                            {% if form.quantity_returned.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.quantity_returned.errors|join:", " }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">
+                                Max: {{ max_returned }}
+                            </p>                            
+                        </div>
+
+                        <!-- Return Date (conditionally visible) -->
+                        <div id="return-date-field" class="{% if loan.quantity_returned == 0 %}hidden{% endif %}">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="id_return_date">Return Date</label>
+                            {% render_field form.return_date class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" type="date" %}
+                            {% if form.return_date.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.return_date.errors|join:", " }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            {% render_field form.notes class="w-full px-2 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" rows="3" %}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <a href="{% url 'pharmacy_loan_detail' pk=loan.pk %}" 
+                           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            Update Loan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusField = document.querySelector('#id_status');
+    const soldField = document.querySelector('#sold-field');
+    const returnedField = document.querySelector('#returned-field');
+    const returnDateField = document.querySelector('#return-date-field');
+    
+    function toggleFields() {
+        const status = statusField.value;
+        const quantityReturned = document.querySelector('#id_quantity_returned').value;
+        
+        if (status === 'sold') {
+            soldField.classList.remove('hidden');
+            returnedField.classList.add('hidden');
+            returnDateField.classList.add('hidden');
+        } else if (status === 'returned') {
+            soldField.classList.add('hidden');
+            returnedField.classList.remove('hidden');
+            returnDateField.classList.remove('hidden');
+        } else {
+            soldField.classList.remove('hidden');
+            returnedField.classList.remove('hidden');
+            returnDateField.classList.add('hidden');
+        }
+
+        if (quantityReturned > 0) {
+            returnDateField.classList.remove('hidden');
+        } else {
+            returnDateField.classList.add('hidden');
+        }
+    }
+    
+    statusField.addEventListener('change', toggleFields);
+    toggleFields(); // Initialize
+
+    const quantityReturnedField = document.querySelector('#id_quantity_returned');
+    quantityReturnedField.addEventListener('input', toggleFields);
+});
+</script>
+
+{% endblock %}

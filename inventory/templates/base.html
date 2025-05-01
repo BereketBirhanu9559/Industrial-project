@@ -127,11 +127,11 @@
                             <li><a href="#" class="nav-link"><i class="fas fa-box mr-2"></i>Products</a></li>
                             <li><a href="#" class="nav-link"><i class="fas fa-archive mr-2"></i>Reservations</a></li>
                             <li><a href="#" class="nav-link text-red-400"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
-                        {% elif user.role == 'manager' %}
-                            <li><a href="{% url 'manager_home' %}" class="nav-link"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a></li>
-                            <li><a href="{% url 'low_stock_report' %}" class="nav-link"><i class="fas fa-exclamation-triangle mr-2"></i>Low Stock</a></li>
-                            <li><a href="{% url 'inventory_summary' %}" class="nav-link"><i class="fas fa-chart-pie mr-2"></i>Inventory Summary</a></li>
-                            <li><a href="{% url 'sales_report' %}" class="nav-link"><i class="fas fa-chart-line mr-2"></i>Sales Report</a></li>
+                        {% elif user.profile.role == 'regulatory' %}
+                            <li><a href="{% url 'index' %}" class="nav-link"><i class="fas fa-home mr-2"></i>Home</a></li>
+                            <li><a href="{% url 'expired_products' %}" class="nav-link"><i class="fas fa-tachometer-alt mr-2"></i> Expired Items</a></li>
+                            <li><a href="{% url 'near_expiry_list' %}" class="nav-link"><i class="fas fa-exclamation-triangle mr-2"></i>Nearly Expired Items</a></li>
+                            <li><a href="{% url 'pharmacy_loans_list' %}" class="nav-link"><i class="fas fa-chart-pie mr-2"></i>loans Items</a></li>
                         {% endif %}
                     {% else %}
                         <li><a href="{% url 'index' %}" class="nav-link pr-4"><i class="fas fa-home mr-2"></i>Home</a></li>

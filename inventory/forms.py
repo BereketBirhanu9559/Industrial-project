@@ -3,7 +3,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import check_password
-from .models import UserProfile,Inventory
+from .models import UserProfile,Inventory, Disposal
+from django.utils import timezone
+from django.db.models import Q
+from django.utils.safestring import mark_safe  # Add this import
+
 
 class LoginForm(AuthenticationForm):
     role = forms.ChoiceField(
@@ -127,3 +131,78 @@ class ShelfLocationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['shelf_location'].label = "New Shelf Location"
+
+class DisposalForm(forms.ModelForm):
+    class Meta:
+        model = Disposal
+        fields = ['method', 'quantity', 'documentation', 'notes']
+        widgets = {
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'step': 1
+            }),
+            # ... other widgets ...
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.product = kwargs.pop('product', None)
+        super().__init__(*args, **kwargs)
+        if self.product:
+            self.fields['quantity'].widget.attrs['max'] = self.product.quantity
+
+class BulkDisposalForm(forms.Form):
+    method = forms.ChoiceField(
+        choices=Disposal.METHOD_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'block w-full px-4 py-2 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50'
+        })
+    )
+    documentation = forms.FileField(
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100'
+        })
+    )
+    notes = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'block w-full px-4 py-2 mt-1 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring focus:ring-red-200 focus:ring-opacity-50',
+            'rows': 3
+        })
+    )
+    products = forms.ModelMultipleChoiceField(
+        queryset=Inventory.objects.none(),
+        widget=forms.CheckboxSelectMultiple(),
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['products'].queryset = self.get_eligible_products()
+            # Override the label_from_instance to show more detailed information
+            self.fields['products'].label_from_instance = self.label_from_product
+
+    def get_eligible_products(self):
+        """Returns products eligible for bulk disposal"""
+        return Inventory.objects.filter(
+            Q(expiry_date__lt=timezone.now().date()) | Q(status='expired'),
+            status__in=['available', 'pharmacy', 'expired'],
+            quantity__gt=0
+        ).order_by('expiry_date')
+
+    def label_from_product(self, product):
+        """Custom label format for products"""
+        return mark_safe(f"""
+            <div class="flex justify-between">
+                <span class="text-gray-700">{product.product_name}</span>
+                <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                    Exp: {product.expiry_date.strftime('%Y-%m-%d')}
+                </span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">
+                Batch: {product.batch_no} | Qty: {product.quantity} | Location: {product.shelf_location or 'N/A'}
+            </div>
+        """)

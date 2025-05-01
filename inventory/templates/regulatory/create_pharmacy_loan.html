@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <h1 class="text-2xl font-bold text-white">
+                    <i class="fas fa-exchange-alt mr-2"></i>
+                    Loan Product to Pharmacy
+                </h1>
+                <p class="text-blue-100 mt-1">
+                    {{ product.product_name }} - Batch {{ product.batch_no }}
+                    (Expires: {{ product.expiry_date|date:"Y-m-d" }})
+                </p>
+            </div>
+
+            <div class="p-6">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    This product expires in {{ product.days_until_expiry }} days.
+                                    Available quantity: <span class="font-bold">{{ product.quantity }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pharmacy Name *</label>
+                            {% render_field form.pharmacy_name class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %}
+                            {% if form.pharmacy_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.pharmacy_name.errors|join:", " }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person *</label>
+                                {% render_field form.contact_person class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %}
+                                {% if form.contact_person.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.contact_person.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone *</label>
+                                {% render_field form.contact_phone class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %}
+                                {% if form.contact_phone.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.contact_phone.errors|join:", " }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantity to Loan *</label>
+                            {% render_field form.quantity_loaned class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" min="1" max=product.quantity %}
+                            {% if form.quantity_loaned.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.quantity_loaned.errors|join:", " }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500">
+                                Maximum available: {{ product.quantity }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                            {% render_field form.notes class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" rows="3" %}
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <a href="{% url 'near_expiry_list' %}" 
+                           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                            Create Loan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

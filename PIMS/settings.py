@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'customer.apps.CustomerConfig',
     'inventory.apps.InventoryConfig',
+    'widget_tweaks',
+    'django.contrib.humanize',
+
+
 ]
 
 MIDDLEWARE = [
@@ -51,10 +57,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTHENTICATION_BACKENDS = [
+'''AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'customer.backends.CustomerBackend',
-]
+]'''
 
 ROOT_URLCONF = 'PIMS.urls'
 
@@ -130,3 +136,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #AUTH_USER_MODEL = 'inventory.User'  # Replace 'yourapp' with your app name
 AUTH_USER_MODEL = 'inventory.User'  # replace 'your_app' with your actual app name
 
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bizunehbiniyam70@gmail.com'
+EMAIL_HOST_PASSWORD = 'uaiiamvspqzcykke'  # Use app password, no quotes
+DEFAULT_FROM_EMAIL = 'bizunehbiniyam70@gmail.com'
+
+# Media Files (for documents)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

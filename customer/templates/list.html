@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">Available Medicines</h2>
+
+    <!-- Feedback Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %} text-white p-4 rounded mb-4">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Search and Filter Form -->
+    <form method="post" action="" class="mb-6 flex items-center justify-between space-x-4">
+        {% csrf_token %}
+        <div class="flex items-center space-x-2">
+            <input type="text" name="search" placeholder="Search products"
+                class="shadow appearance-none border rounded w-64 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value="{{ search }}">
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">
+                Search
+            </button>
+        </div>
+        <div class="flex items-center">
+            <label for="category_filter" class="text-sm font-bold text-gray-700">Filter by Category:</label>
+            <select name="category_filter" onchange="this.form.submit()"
+                class="shadow appearance-none border rounded w-64 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>
+                        {{ category }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    <!-- Medicines Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% if medicines %}
+            {% for medicine in medicines %}
+                {% if medicine.id not in cart_product_ids %}
+                    <div class="border rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-300">
+                        <h3 class="text-lg font-bold">{{ medicine.product_name }}</h3>
+                        <p class="text-gray-700">Category: {{ medicine.get_category_display }}</p>
+                        <p class="text-gray-700">Price: {{ medicine.price|floatformat:2 }} Birr</p>
+                        <p class="text-gray-600">Expiry Date: {{ medicine.expiry_date }}</p>
+                        <p class="text-gray-600">Available: {{ medicine.quantity }}</p>
+
+                        <!-- Add to Cart Form -->
+                        <form method="post" action="" class="mt-4 flex items-center space-x-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ medicine.id }}">
+                            <label for="quantity_{{ medicine.id }}"
+                                class="block text-sm font-bold">Quantity:</label>
+                            <input type="number" name="quantity" id="quantity_{{ medicine.id }}"
+                                min="1" max="{{ medicine.quantity }}" required
+                                class="shadow appearance-none border rounded w-20 py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <button type="submit" name="add_to_cart"
+                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-700 text-center">No medicines found matching the search/filter criteria.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
 <style>
@@ -11,13 +12,22 @@
         border-radius: 16px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .input-field:focus {
-        border-color: #4299e1;
-        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        color: black;
-        background-color: rgba(255, 255, 255, 0.8);
-    }
     .input-field {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        padding: 12px 20px;
+        width: 100%;
+        border-radius: 10px;
+        color: black;
+        font-size: 1rem;
+        transition: all 0.3s ease-in-out;
+    }
+    .input-field:focus {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: #4299e1;
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.3);
+        outline: none;
         color: black;
     }
     .login-button {
@@ -58,14 +68,14 @@
             {% csrf_token %}
             
             <input type="hidden" name="next" value="{{ request.GET.next }}">
-            
+
             <div class="relative">
-                <label class="text-white mb-2 block">Username</label>
+                <label class="text-white mb-2 block">Username or Email</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
                         <i class="fas fa-user"></i>
                     </span>
-                    {{ form.username }}
+                    {{ form.username|add_class:"input-field" }}
                 </div>
             </div>
 
@@ -75,7 +85,7 @@
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
                         <i class="fas fa-lock"></i>
                     </span>
-                    {{ form.password }}
+                    {{ form.password|add_class:"input-field" }}
                 </div>
             </div>
 

@@ -1,23 +1,95 @@
-<!-- templates/wholesaler/home.html -->
 {% extends 'layout.html' %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
     <div class="max-w-7xl mx-auto">
-        <!-- Hero Section -->
-        <section class="bg-white shadow-xl rounded-2xl overflow-hidden mb-12">
-            <div class="grid md:grid-cols-2 items-center">
-                <div class="p-12">
-                    <h1 class="text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                        Wholesale Pharmaceutical Marketplace
-                    </h1>
-                    <p class="text-xl text-gray-600 mb-6">
-                        Bulk Drug Procurement Platform for Healthcare Professionals
-                    </p>
+        
+        {% if user.is_authenticated %}
+            <!-- Authenticated User View - Available Medicines -->
+            <h2 class="text-2xl font-bold mb-4">Available Medicines</h2>
 
-                    {% if not user.is_authenticated %}
+            <!-- Feedback Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %} text-white p-4 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Search and Filter Form -->
+            <form method="post" action="" class="mb-6 flex items-center justify-between space-x-4">
+                {% csrf_token %}
+                <div class="flex items-center space-x-2">
+                    <input type="text" name="search" placeholder="Search products"
+                        class="shadow appearance-none border rounded w-64 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        value="{{ search }}">
+                    <button type="submit"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">
+                        Search
+                    </button>
+                </div>
+                <div class="flex items-center">
+                    <label for="category_filter" class="text-sm font-bold text-gray-700">Filter by Category:</label>
+                    <select name="category_filter" onchange="this.form.submit()"
+                        class="shadow appearance-none border rounded w-64 py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">All Categories</option>
+                        {% for category, name in categories %}
+                            <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>
+                                {{ name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            <!-- Medicines Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% if medicines %}
+                    {% for medicine in medicines %}
+                        <div class="border rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-300 bg-white">
+                            <h3 class="text-lg font-bold">{{ medicine.product_name }}</h3>
+                            <p class="text-gray-700">Category: {{ medicine.category }}</p>
+                            <p class="text-gray-700">Price: {{ medicine.price|floatformat:2 }} Birr</p>
+                            <p class="text-gray-600">Expiry Date: {{ medicine.expiry_date }}</p>
+                            <p class="text-gray-600">Available: {{ medicine.quantity }}</p>
+
+                            <!-- Add to Cart Form -->
+                            <form method="post" action="{% url 'add_to_cart' %}" class="mt-4 flex items-center space-x-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ medicine.id }}">
+                                <label for="quantity_{{ medicine.id }}"
+                                    class="block text-sm font-bold">Quantity:</label>
+                                <input type="number" name="quantity" id="quantity_{{ medicine.id }}"
+                                    min="1" max="{{ medicine.quantity }}" required
+                                    class="shadow appearance-none border rounded w-20 py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <button type="submit" name="add_to_cart"
+                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                    Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-gray-700 text-center">No medicines found in this category.</p>
+                {% endif %}
+            </div>
+        
+        {% else %}
+            <!-- Non-Authenticated User View - Marketing Content -->
+            <!-- Hero Section -->
+            <section class="bg-white shadow-xl rounded-2xl overflow-hidden mb-12">
+                <div class="grid md:grid-cols-2 items-center">
+                    <div class="p-12">
+                        <h1 class="text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                            Wholesale Pharmaceutical Marketplace
+                        </h1>
+                        <p class="text-xl text-gray-600 mb-6">
+                            Bulk Drug Procurement Platform for Healthcare Professionals
+                        </p>
+
                         <div class="flex space-x-4">
-                            <a href="#" class="nav-link">
+                            <a href="{% url 'initial_registration' %}" class="nav-link">
                                 <i class="fas fa-file-signature mr-2"></i> Apply for Registration
                             </a>
                             <a href="{% url 'customer_login' %}"
@@ -25,100 +97,23 @@
                                 <i class="fas fa-sign-in-alt mr-2"></i> Login
                             </a>
                         </div>
-                    {% endif %}
-                </div>
-                <div class="relative w-full h-full overflow-hidden">
-                    <video 
-                        autoplay 
-                        loop 
-                        muted 
-                        playsinline 
-                        class="w-full h-full object-cover"
-                        poster="https://via.placeholder.com/800x600?text=Loading+Warehouse+Video"
-                    >
-                        <source src="https://media.istockphoto.com/id/2180141537/video/large-food-warehouse-with-products.mp4?s=mp4-640x640-is&k=20&c=ZVe5c1yzspf57TgkhTRnNWZaZ2gtV-G5RwPKIyGipuw=" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    <!-- Optional: Video controls overlay -->
-                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                        <button class="video-control bg-white bg-opacity-30 rounded-full p-2 text-white hover:bg-opacity-50 transition">
-                            <i class="fas fa-play"></i>
-                        </button>
+                    </div>
+                    <div class="relative w-full h-full overflow-hidden">
+                        <video 
+                            autoplay 
+                            loop 
+                            muted 
+                            playsinline 
+                            class="w-full h-full object-cover"
+                            poster="https://via.placeholder.com/800x600?text=Loading+Warehouse+Video"
+                        >
+                            <source src="https://media.istockphoto.com/id/2180141537/video/large-food-warehouse-with-products.mp4?s=mp4-640x640-is&k=20&c=ZVe5c1yzspf57TgkhTRnNWZaZ2gtV-G5RwPKIyGipuw=" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
                     </div>
                 </div>
-        </section>
-
-        <!-- Product Categories -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">
-                Pharmaceutical Product Categories
-            </h2>
-            <div class="grid md:grid-cols-4 gap-6">
-                {% for category in categories %}
-                    <div class="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-xl transition transform hover:-translate-y-2">
-                        <div class="bg-{{ category.color }}-100 rounded-full p-4 inline-block mb-4">
-                            <i class="{{ category.icon }} text-3xl text-{{ category.color }}-600"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold">{{ category.name }}</h3>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Featured Products -->
-        <section class="mb-12">
-            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">
-                Featured Bulk Products
-            </h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                {% for product in products %}
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition transform hover:-translate-y-2">
-                        <img src="{{ product.image }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-2">{{ product.name }}</h3>
-                            <p class="text-gray-600 mb-4">{{ product.description }}</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-green-600">
-                                    {{ product.price|floatformat:"0" }} Birr
-                                </span>
-                                <span class="text-sm text-gray-500">
-                                    Min Order: {{ product.min_order }} units
-                                </span>
-                            </div>
-                            {% if user.is_authenticated %}
-                                <button class="w-full bg-blue-500 text-white py-3 rounded-full mt-4 hover:bg-blue-600 transition">
-                                    Add to Bulk Order
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Wholesale Benefits -->
-        <section class="bg-white rounded-2xl shadow-xl p-12 text-center">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">
-                Why Choose Our Wholesale Platform?
-            </h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div>
-                    <i class="fas fa-shield-alt text-4xl text-blue-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">Certified Quality</h3>
-                    <p>All products are FDA approved and quality certified</p>
-                </div>
-                <div>
-                    <i class="fas fa-truck text-4xl text-green-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">Shipping</h3>
-                    <p>Worldwide delivery for bulk pharmaceutical orders</p>
-                </div>
-                <div>
-                    <i class="fas fa-percent text-4xl text-purple-600 mb-4"></i>
-                    <h3 class="text-xl font-semibold mb-2">Competitive Pricing</h3>
-                    <p>Best wholesale rates in the pharmaceutical market</p>
-                </div>
-            </div>
-        </section>
+            </section>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

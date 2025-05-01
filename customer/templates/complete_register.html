@@ -1,0 +1,99 @@
+{% extends 'layout.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<style>
+    .form-background {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .form-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .input-field {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        padding: 12px 20px;
+        width: 50%;  /* Adjust width here */
+        border-radius: 10px;
+        margin-top: 4px;
+        color: black;
+        font-size: 1rem;
+        transition: all 0.3s ease-in-out;
+    }
+    .input-field:focus {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: #4299e1;
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.3);
+        outline: none;
+        color: black;
+    }
+    .submit-button {
+        width: 35%;
+        transition: all 0.3s ease;
+        background: linear-gradient(to right, #4299e1, #3182ce);
+    }
+    .submit-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(50, 50, 93, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+</style>
+
+<div class="min-h-screen flex items-center justify-center form-background py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl w-full space-y-8 form-card p-12 shadow-2xl">
+        <div class="text-center">
+            <h2 class="mt-6 text-5xl font-extrabold text-white">
+                Complete Your Registration 
+            </h2>
+            <p class="mt-2 text-md text-blue-200">
+                Please complete your registration by setting up your credentials.
+            </p>
+        </div>
+
+        {% if form.errors %}
+            <div class="bg-red-500 text-white p-4 rounded-lg shadow-md">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p class="font-bold">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="text-white mb-2 block font-semibold tracking-wide">
+                    {{ field.label }}
+                </label>
+                {{ field|add_class:"input-field w-4/5" }}  <!-- Adjust width here -->
+                {% if field.errors %}
+                    <p class="text-red-300 text-xs mt-2">{{ field.errors|striptags }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div>
+                <button type="submit" class="submit-button w-full py-4 rounded-lg text-white font-bold uppercase tracking-wider text-lg">
+                    <i class="fas fa-paper-plane mr-2"></i> Set Credentials
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-6">
+            <a href="#" class="text-blue-200 hover:text-white text-sm">
+                Need Help? Contact Support
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
