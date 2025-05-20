@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +29,35 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+CHAPA_SECRET_KEY = 'CHASECK_TEST-zDbgt1nl85l3GjFeNjDxYyelPg8Lwc46'
+ALLOWED_HOSTS = ['0fe5-196-191-223-133.ngrok-free.app', 'localhost', '127.0.0.1']
+SESSION_COOKIE_AGE = 7200
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,7 +67,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'inventory'
+    'customer.apps.CustomerConfig',
+    'inventory.apps.InventoryConfig',
+    'widget_tweaks',
+
 ]
 
 MIDDLEWARE = [
@@ -49,6 +82,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+'''AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'customer.backends.CustomerBackend',
+]'''
 
 ROOT_URLCONF = 'PIMS.urls'
 
@@ -121,3 +159,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+#AUTH_USER_MODEL = 'inventory.User'  # Replace 'yourapp' with your app name
+AUTH_USER_MODEL = 'inventory.User'  # replace 'your_app' with your actual app name
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'biniyambizuneh215@gmail.com'
+EMAIL_HOST_PASSWORD = 'wwubavatlymtlozj'  # Use app password, no quotes
+DEFAULT_FROM_EMAIL = 'biniyambizuneh215@gmail.com'
+
+# Media Files (for documents)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+# Add to your Django settings.py

@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-5">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white">
+                        <i class="fas fa-pills mr-2"></i>
+                        {{ product.product_name }} 
+                        <span class="font-light">- {{ product.batch_no }}</span>
+                    </h1>
+                    <div class="flex items-center mt-2 space-x-4">
+                        <span class="text-blue-100 text-sm">
+                            <i class="fas fa-tag mr-1"></i> {{ product.get_category_display }}
+                        </span>
+                        <span class="text-blue-100 text-sm">
+                            <i class="fas fa-map-marker-alt mr-1"></i> {{ product.shelf_location|default:"Location not set" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="mt-3 md:mt-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                        {% if product.status == 'expired' %}bg-red-100 text-red-800
+                        {% elif product.status == 'disposed' %}bg-gray-200 text-gray-800
+                        {% elif product.status == 'quarantined' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-green-100 text-green-800{% endif %} shadow-sm">
+                        {% if product.status == 'expired' %}
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                        {% elif product.status == 'disposed' %}
+                            <i class="fas fa-trash-alt mr-1"></i>
+                        {% elif product.status == 'quarantined' %}
+                            <i class="fas fa-ban mr-1"></i>
+                        {% else %}
+                            <i class="fas fa-check-circle mr-1"></i>
+                        {% endif %}
+                        {{ product.get_status_display }}
+                        {% if product.status == 'expired' and product.remaining_post_return_quantity > 0 %}
+                            ({{ product.remaining_post_return_quantity|intcomma }} available for disposal)
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-6">
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <!-- Product Information -->
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+                        <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+                        Product Information
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Expiry Date:</span>
+                            <span class="{% if product.expiry_date < current_date %}text-red-600 font-semibold{% else %}text-gray-600{% endif %}">
+                                {{ product.expiry_date|date:"M j, Y" }}
+                                <span class="text-sm ml-2 {% if product.expiry_date < current_date %}text-red-500{% else %}text-gray-500{% endif %}">
+                                    {% with days=product.expiry_date|timesince:current_date %}
+                                        {% if product.expiry_date < current_date %}
+                                            (Expired {{ days }} ago)
+                                        {% else %}
+                                            (Expires in {{ days }})
+                                        {% endif %}
+                                    {% endwith %}
+                                </span>
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 bg-white p-3 rounded-md border">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500">Returned</p>
+                                <p class="text-lg font-bold text-blue-600">{{ product.returned_quantity|intcomma }}</p>
+                            </div>
+                            <div class="text-center border-x">
+                                <p class="text-sm font-medium text-gray-500">Disposed</p>
+                                <p class="text-lg font-bold text-red-600">{{ product.total_disposed|intcomma }}</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500">Available</p>
+                                <p class="text-lg font-bold {% if product.remaining_post_return_quantity == 0 %}text-gray-500{% else %}text-green-600{% endif %}">
+                                    {{ product.remaining_post_return_quantity|intcomma }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Added On:</span>
+                            <span class="text-gray-600">{{ product.created_at|date:"M j, Y" }}</span>
+                        </div>
+
+                        {% if product.moved_to_pharmacy_date %}
+                        <div class="flex justify-between">
+                            <span class="font-medium text-gray-700">Moved to Pharmacy:</span>
+                            <span class="text-gray-600">{{ product.moved_to_pharmacy_date|date:"M j, Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions Section -->
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
+                        <i class="fas fa-bolt mr-2 text-blue-600"></i>
+                        Actions
+                    </h2>
+                    
+                    {% if can_dispose %}
+                        <div class="space-y-3">
+                            {% if product.status == 'expired' or product.expiry_date < current_date %}
+                                <a href="{% url 'dispose_product' pk=product.pk %}" 
+                                   class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg">
+                                    <i class="fas fa-trash-alt mr-2"></i> 
+                                    Record Disposal ({{ product.remaining_post_return_quantity|intcomma }} available)
+                                </a>
+                            {% endif %}
+                            <a href="#" 
+                               class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg">
+                                <i class="fas fa-edit mr-2"></i> Edit Product Details
+                            </a>
+                            <a href="#" 
+                               class="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all shadow-md hover:shadow-lg">
+                                <i class="fas fa-history mr-2"></i> View Audit Trail
+                            </a>
+                        </div>
+                    {% elif product.status == 'disposed' or product.remaining_post_return_quantity == 0 %}
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                            <div>
+                                <p class="text-green-800 font-medium">This product has been fully disposed</p>
+                                <p class="text-green-700 text-sm mt-1">No further disposals can be recorded for this batch.</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <p class="text-blue-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                No actions currently available for this product
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Disposal History Section -->
+            <div class="border-t pt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        <i class="fas fa-history mr-2 text-blue-600"></i>
+                        Disposal History
+                    </h2>
+                    {% if disposals %}
+                    <span class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                        {{ disposals.count }} record{{ disposals.count|pluralize }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if disposals %}
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Method</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Remaining After</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Documented By</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for disposal in disposals %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ disposal.disposal_date|date:"M j, Y" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ disposal.get_method_display }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                        {{ disposal.quantity|intcomma }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            {% if disposal.is_complete %}bg-green-100 text-green-800
+                                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                            {% if disposal.is_complete %}
+                                                <i class="fas fa-check-circle mr-1"></i> Complete
+                                            {% else %}
+                                                <i class="fas fa-hourglass-half mr-1"></i> Partial
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ disposal.remaining_after|intcomma }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-medium">
+                                                {{ disposal.documented_by.get_full_name|slice:":1" }}
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-gray-900 font-medium">{{ disposal.documented_by.get_full_name }}</p>
+                                                <p class="text-gray-500 text-xs">{{ disposal.documented_by.username }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                        <i class="fas fa-box-open text-gray-400 text-4xl mb-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">No disposal records found</h3>
+                        <p class="mt-1 text-sm text-gray-500">No disposals have been recorded for this product batch.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

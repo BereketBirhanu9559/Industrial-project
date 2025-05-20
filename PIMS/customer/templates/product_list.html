@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-4">Available Medicines</h2>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'success' %}bg-green-500{% else %}bg-red-500{% endif %} text-white p-4 rounded mb-4">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Search/Filter Form -->
+    <form method="post" class="mb-6 flex items-center justify-between space-x-4">
+        {% csrf_token %}
+        <div class="flex items-center space-x-2">
+            {{ search_form.search }}
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">
+                Search
+            </button>
+        </div>
+        <div class="flex items-center">
+            <label for="id_category_filter" class="text-sm font-bold text-gray-700 mr-2">Filter by Category:</label>
+            {{ search_form.category_filter }}
+        </div>
+    </form>
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% if products %}
+            {% for product in products %}
+                <div class="border rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow duration-300">
+                    <h3 class="text-lg font-bold">{{ product.product_name }}</h3>
+                    <p class="text-gray-700">Category: {{ product.category }}</p>
+                    <p class="text-gray-700">Price: {{ product.price|floatformat:2 }} Birr</p>
+                    <p class="text-gray-600">Expiry Date: {{ product.expiry_date }}</p>
+                    <p class="text-gray-600">Available: {{ product.quantity }}</p>
+                 
+                    <!-- Add to Cart Form 
+                    <form method="post" class="mt-4 flex items-center space-x-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <label for="quantity_{{ product.id }}" class="block text-sm font-bold">Quantity:</label>
+                        <input type="number" name="quantity" id="quantity_{{ product.id }}" 
+                               min="1" max="{{ product.quantity }}" value="1" required
+                               class="shadow appearance-none border rounded w-20 py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <button type="submit" name="add_to_cart"
+                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                            Add to Cart
+                        </button>
+                    </form>-->
+
+                    <!-- Inside product loop -->
+                    <form method="post" action="{% url 'customer:add_to_cart' product.id %}">
+                        {% csrf_token %}
+                        <input type="number" name="quantity" value="" min="1" max="{{ product.quantity }}" 
+                            class="w-16 border rounded px-2 py-1 mr-2">
+                        <button type="submit" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            Add to Cart
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-700 text-center">No medicines found matching the search/filter criteria.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

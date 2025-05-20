@@ -1,0 +1,91 @@
+<!-- customer/templates/customer/order_detail.html -->
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6">Order #{{ order.id }}</h1>
+        
+        <div class="mb-6">
+            <div class="flex justify-between mb-2">
+                <span class="font-medium">Order Date:</span>
+                <span>{{ order.order_date }}</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span class="font-medium">Status:</span>
+                <span class="font-medium 
+                    {% if order.status == 'paid' %}text-green-600
+                    {% elif order.status == 'failed' %}text-red-600
+                    {% else %}text-yellow-600{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+            {% if order.payment_date %}
+            <div class="flex justify-between mb-2">
+                <span class="font-medium">Payment Date:</span>
+                <span>{{ order.payment_date }}</span>
+            </div>
+            {% endif %}
+            <div class="flex justify-between text-lg font-bold mt-4 pt-4 border-t">
+                <span>Total Amount:</span>
+                <span>{{ order.total_amount }} Birr</span>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-left">
+                        <th class="py-3 px-4">Product</th>
+                        <th class="py-3 px-4">Price</th>
+                        <th class="py-3 px-4">Quantity</th>
+                        <th class="py-3 px-4">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-4 px-4">{{ item.product.product_name }}</td>
+                        <td class="py-4 px-4">{{ item.price }} Birr</td>
+                        <td class="py-4 px-4">{{ item.quantity }}</td>
+                        <td class="py-4 px-4">{{ item.get_subtotal }} Birr</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if order.status == 'paid' %}
+        <div class="mt-6 p-4 bg-green-50 rounded-lg">
+            <div class="flex items-center text-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="font-medium">Payment successful! Thank you for your order.</span>
+            </div>
+            <p class="mt-2 text-green-600">Your items will be prepared for delivery.</p>
+        </div>
+        {% elif order.status == 'failed' %}
+        <div class="mt-6 p-4 bg-red-50 rounded-lg">
+            <div class="flex items-center text-red-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span class="font-medium">Payment failed</span>
+            </div>
+            <p class="mt-2 text-red-600">We couldn't process your payment. Please try again.</p>
+            <a href="{% url 'view_cart' %}" class="mt-3 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Back to Cart
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="mt-6">
+            <a href="{% url 'items_list' %}" class="inline-block bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

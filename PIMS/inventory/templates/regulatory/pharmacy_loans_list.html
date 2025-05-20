@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-blue-600 px-6 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-white">
+                    <i class="fas fa-exchange-alt mr-2"></i>
+                    Pharmacy Loans
+                </h1>
+                <div class="flex space-x-2">
+                    <a href="{% url 'near_expiry_list' %}" 
+                       class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-700">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Near Expiry
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="flex border-b mb-6">
+            <a href="?status=on_loan" 
+               class="px-4 py-2 font-medium {% if status_filter == 'on_loan' %}text-blue-600 border-b-2 border-blue-600{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                Active Loans
+            </a>
+            <a href="?status=sold" 
+               class="px-4 py-2 font-medium {% if status_filter == 'sold' %}text-green-600 border-b-2 border-green-600{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                Sold Items
+            </a>
+            <a href="?status=returned" 
+               class="px-4 py-2 font-medium {% if status_filter == 'returned' %}text-gray-600 border-b-2 border-gray-600{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                Returned Items
+            </a>
+            <a href="?" 
+               class="px-4 py-2 font-medium {% if not status_filter %}text-black border-b-2 border-black{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+                All
+            </a>
+        </div>
+
+        <!-- Loans Table -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pharmacy</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loan Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for loan in loans %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium text-gray-900">{{ loan.inventory.product_name }}</div>
+                            <div class="text-sm text-gray-500">Batch: {{ loan.inventory.batch_no }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="font-medium">{{ loan.pharmacy_name }}</div>
+                            <div class="text-sm text-gray-500">{{ loan.contact_person }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ loan.loan_date|date:"Y-m-d" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium">
+                                {% if status_filter == 'on_loan' %}
+                                    {{ loan.quantity_loaned }} loaned
+                                {% elif status_filter == 'sold' %}
+                                    {{ loan.quantity_sold }} sold
+                                {% elif status_filter == 'returned' %}
+                                    {{ loan.quantity_returned }} returned
+                                {% else %}
+                                    {{ loan.quantity_loaned }} loaned
+                                    {% if loan.quantity_sold > 0 %}
+                                        <span class="text-green-600">({{ loan.quantity_sold }} sold)</span>
+                                    {% endif %}
+                                    {% if loan.quantity_returned > 0 %}
+                                        <span class="text-gray-600">({{ loan.quantity_returned }} returned)</span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if status_filter == 'returned' %}bg-gray-100 text-gray-800
+                                {% elif status_filter == 'sold' %}bg-green-100 text-green-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {% if status_filter == 'returned' %}
+                                    Returned
+                                {% elif status_filter == 'sold' %}
+                                    Sold
+                                {% else %}
+                                    On Loan
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'pharmacy_loan_detail' pk=loan.pk %}" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            {% if loan.quantity_sold == 0 and loan.quantity_returned == 0 %}
+                            <a href="{% url 'update_pharmacy_loan' pk=loan.pk %}" class="text-green-600 hover:text-green-900">
+                                <i class="fas fa-edit"></i> Update
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            No pharmacy loans found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+            <div class="flex space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="px-3 py-1 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Previous
+                </a>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="px-3 py-1 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

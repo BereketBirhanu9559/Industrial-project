@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<style>
+    .login-background {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .login-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .input-field {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(5px);
+        padding: 12px 20px;
+        width: 100%;
+        border-radius: 10px;
+        color: black;
+        font-size: 1rem;
+        transition: all 0.3s ease-in-out;
+    }
+    .input-field:focus {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: #4299e1;
+        box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.3);
+        outline: none;
+        color: black;
+    }
+    .login-button {
+        transition: all 0.3s ease;
+        background: linear-gradient(to right, #4299e1, #3182ce);
+    }
+    .login-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+</style>
+
+<div class="min-h-screen flex items-center justify-center login-background py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 login-card p-10 shadow-2xl">
+        <div class="text-center">
+            <h2 class="mt-6 text-4xl font-extrabold text-white">
+                Customer Login
+            </h2>
+            <p class="mt-2 text-sm text-blue-200">
+                Secure Login Portal
+            </p>
+        </div>
+
+        {% if form.errors %}
+            <div class="bg-red-500 text-white p-4 rounded-lg shadow-md">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p class="font-bold">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+            <div class="relative">
+                <label class="text-white mb-2 block">Username or Email</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    {{ form.username|add_class:"input-field" }}
+                </div>
+            </div>
+
+            <div class="relative">
+                <label class="text-white mb-2 block">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-blue-300">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    {{ form.password|add_class:"input-field" }}
+                </div>
+            </div>
+
+            <button type="submit" class="login-button w-full py-3 rounded-lg text-white font-bold uppercase tracking-wider">
+                <i class="fas fa-sign-in-alt mr-2"></i> Login
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="#" class="text-blue-200 hover:text-white text-sm mr-4">
+                Forgot Password?
+            </a>
+            <a href="#" class="text-blue-200 hover:text-white text-sm">
+                Create Account
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

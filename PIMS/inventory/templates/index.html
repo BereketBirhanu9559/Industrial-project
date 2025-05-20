@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4">
+    <div class="max-w-5xl mx-auto">
+        {% if user.is_authenticated %}
+            <!-- Authenticated User Dashboard -->
+            <div class="bg-white shadow-2xl rounded-2xl p-8 animate-slide-in-up">
+                <div class="flex flex-col items-center space-y-3 text-center">
+                    <h2 class="text-3xl font-bold text-indigo-700">Welcome, {{ user.username }}</h2>
+                    <p class="text-gray-500 text-md italic tracking-wide">{{ user.profile.get_role_display }} Dashboard</p>
+                </div>
+
+                {% if user.profile.role == 'clerk' %}
+                    <div class="max-w-6xl mx-auto py-12 px-4">
+                        <div class="text-center mb-12">
+                            <h2 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-4">
+                                Clerk Dashboard
+                            </h2>
+                            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                                Efficiently manage inventory, products, and stock reservations.
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-2xl p-10 transform transition hover:scale-[1.01]">
+                            <div class="grid md:grid-cols-3 gap-8">
+                                <!-- Inventory Registration Card -->
+                                <div class="group bg-blue-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                                    <i class="fas fa-boxes text-5xl mb-4 text-blue-500 group-hover:text-blue-600"></i>
+                                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Inventory Registration</h3>
+                                    <p class="text-gray-600 mb-6 h-16">Register new products and update stock quantities with precision.</p>
+                                    <a href="{% url 'inventory_registration' %}" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition duration-300">Register Inventory</a>
+                                </div>
+
+                                <!-- Product Details Card -->
+                                <div class="group bg-green-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                                    <i class="fas fa-clipboard-list text-5xl mb-4 text-green-500 group-hover:text-green-600"></i>
+                                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Product Details</h3>
+                                    <p class="text-gray-600 mb-6 h-16">Comprehensive view and management of all registered products.</p>
+                                    <a href="{% url 'product_list' %}" class="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition duration-300">View Products</a>
+                                </div>
+
+                                <!-- Reserve Stock Card -->
+                                <div class="group bg-yellow-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                                    <i class="fas fa-cogs text-5xl mb-4 text-yellow-500 group-hover:text-yellow-600"></i>
+                                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Reserve Stock</h3>
+                                    <p class="text-gray-600 mb-6 h-16">Plan and allocate stock for future orders and distribution.</p>
+                                    <a href="#" class="bg-yellow-500 text-white px-6 py-3 rounded-full hover:bg-yellow-600 transition duration-300">Reserve Stock</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% elif user.profile.role == 'manager' %}
+                    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <a href="#" class="card bg-indigo-500 hover:bg-indigo-600">
+                            <i class="fas fa-home text-2xl mr-3"></i>
+                            <span class="font-medium">Manager Home</span>
+                        </a>
+                        <a href="#" class="card bg-yellow-500 hover:bg-yellow-600">
+                            <i class="fas fa-exclamation-triangle text-2xl mr-3"></i>
+                            <span class="font-medium">Low Stock Report</span>
+                        </a>
+                        <a href="#" class="card bg-red-500 hover:bg-red-600">
+                            <i class="fas fa-chart-line text-2xl mr-3"></i>
+                            <span class="font-medium">Sales Report</span>
+                        </a>
+                    </div>
+                {% elif user.profile.role == 'regulatory' %}                    <!-- NEW: Regulatory Officer Dashboard -->
+                    <div class="max-w-6xl mx-auto py-12 px-4">
+                        <div class="text-center mb-12">
+                            <h2 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600 mb-4">
+                                Regulatory Compliance Dashboard
+                            </h2>
+                            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                                Monitor and manage medication compliance, expirations, and regulatory requirements
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-2xl p-10 transform transition hover:scale-[1.01]">
+                            <!-- Compliance Status Cards -->
+                            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                                <!-- Expired Products -->
+                                <div class="group bg-red-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                                    <i class="fas fa-skull-crossbones text-5xl mb-4 text-red-500 group-hover:text-red-600"></i>
+                                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Expired Products</h3>
+                                    <p class="text-gray-600 mb-4">{{ expired_count }} items require disposal</p>
+                                    <a href="{% url 'expired_products' %}" class="bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition duration-300">View Report</a>
+                                </div>
+
+                                <!-- Near-Expiry Products -->
+                                <div class="group bg-yellow-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                                    <i class="fas fa-clock text-5xl mb-4 text-yellow-500 group-hover:text-yellow-600"></i>
+                                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Near-Expiry</h3>
+                                    <p class="text-gray-600 mb-4">{{ near_expiry_count }} items need review</p>
+                                    <a href="{% url 'near_expiry_list' %}" class="bg-yellow-500 text-white px-6 py-3 rounded-full hover:bg-yellow-600 transition duration-300">Monitor</a>
+                                </div>
+
+                                <!-- Compliance Violations -->
+                               <!-- Pharmacy Loan Product -->
+                        <div class="group bg-blue-50 p-6 rounded-2xl shadow-md text-center hover:scale-105 transition-all">
+                            <i class="fas fa-capsules text-5xl mb-4 text-blue-500 group-hover:text-blue-600"></i>
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800">Nearly Expiry Product Loan</h3>
+                            <a href="{% url 'pharmacy_loans_list' %}" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition duration-300">View Loan Details</a>
+                        </div>
+
+                            </div>
+                        {% endif %}
+
+
+                <div class="mt-10 text-center">
+                    <a href="{% url 'logout' %}" class="btn-logout animate-bounce-in">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        {% else %}
+        <div class="bg-white shadow-2xl rounded-2xl overflow-hidden animate-slide-in-up">
+            <!-- Video Container -->
+            <div class="relative h-96 md:h-[500px] w-full">
+                <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover">
+                    <source src="https://media.istockphoto.com/id/2180141537/video/large-food-warehouse-with-products.mp4?s=mp4-640x640-is&k=20&c=ZVe5c1yzspf57TgkhTRnNWZaZ2gtV-G5RwPKIyGipuw=" type="video/mp4">
+                    <!-- Fallback Image -->
+                    <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                         alt="Pharmacy Illustration" 
+                         class="w-full h-full object-cover">
+                </video>
+                <div class="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center p-6">
+                    <div class="text-center text-white max-w-2xl">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Welcome to Pharma Inventory System</h2>
+                        <p class="text-lg mb-6">
+                            Our advanced inventory management system helps pharmacies streamline operations, 
+                            track medications, and optimize stock levels for better patient care.
+                        </p>
+                        <div class="space-y-4 md:space-y-0 md:space-x-4">
+                            <a href="{% url 'login' %}" class="btn-primary inline-block">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Login
+                            </a>
+                            <a href="#" class="btn-secondary inline-block">
+                                <i class="fas fa-info-circle mr-2"></i> Learn More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Section Below Video -->
+            <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                        <h3 class="text-xl font-semibold mb-2">Real-time Tracking</h3>
+                        <p class="text-gray-600">Monitor inventory levels across all locations instantly.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                        <h3 class="text-xl font-semibold mb-2">Expiry Alerts</h3>
+                        <p class="text-gray-600">Get notifications for expiring medications.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                        <h3 class="text-xl font-semibold mb-2">Secure Access</h3>
+                        <p class="text-gray-600">Role-based permissions for all staff levels.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounceIn {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        70% { transform: scale(0.9); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-fade-in-down { animation: fadeInDown 0.8s ease-out; }
+    .animate-fade-in-up { animation: fadeInUp 0.8s ease-out; }
+    .animate-slide-in-up { animation: slideInUp 0.6s ease-out; }
+    .animate-bounce-in { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+     /* Video-specific styles */
+     .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+    }
+
+    .card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        border-radius: 1rem;
+        color: white;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+        transform: translateY(-3px) scale(1.03);
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, #2563eb, #9333ea);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(to right, #1d4ed8, #7e22ce);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(to right, #4b5563, #1f2937);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(to right, #374151, #111827);
+        transform: translateY(-2px);
+    }
+
+    .btn-logout {
+        background-color: #ef4444;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 9999px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+    }
+    /* Feature items */
+    .feature-item {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}

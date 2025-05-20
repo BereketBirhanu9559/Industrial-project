@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Complete Your Payment</h1>
+    <form id="paymentForm">
+        <input type="hidden" name="public_key" value="{{ chapa_public_key }}">
+        <input type="hidden" name="amount" value="{{ total }}">
+        <input type="hidden" name="currency" value="ETB">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="hidden" name="tx_ref" value="{{ tx_ref }}">
+        <input type="hidden" name="callback_url" value="{{ callback_url }}">
+        <input type="hidden" name="return_url" value="{{ return_url }}">
+        <button type="button" onclick="makePayment()" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
+            Pay Now
+        </button>
+    </form>
+</div>
+
+{% block scripts %}
+<script src="https://checkout.chapa.co/checkout.js"></script>
+<script>
+function makePayment() {
+    var handler = ChapaPay.setup({
+        publicKey: document.querySelector('input[name=public_key]').value,
+        amount: document.querySelector('input[name=amount]').value,
+        currency: document.querySelector('input[name=currency]').value,
+        email: document.querySelector('input[name=email]').value,
+        tx_ref: document.querySelector('input[name=tx_ref]').value,
+        callback_url: document.querySelector('input[name=callback_url]').value,
+        return_url: document.querySelector('input[name=return_url]').value,
+    });
+    handler.openDialog();
+}
+</script>
+{% endblock %}
+{% endblock %}

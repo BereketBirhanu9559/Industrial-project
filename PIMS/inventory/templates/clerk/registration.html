@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Custom Gradient Background */
+    .form-background {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* Glassmorphism Card Effect */
+    .registration-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Animated Input Fields */
+    .input-field {
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        transform: translateY(-2px);
+    }
+
+    /* Hover Effects */
+    .submit-button {
+        background: linear-gradient(to right, #4299e1, #3182ce);
+        transition: all 0.4s ease;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+</style>
+
+<div class="min-h-screen flex items-center justify-center form-background py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-4xl registration-card p-10 shadow-2xl">
+        <!-- Header Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-4xl font-extrabold text-gray-800">
+                Product Registration
+            </h2>
+            <p class="mt-2 text-gray-600">
+                Add new pharmaceutical products to the inventory
+            </p>
+        </div>
+
+        <!-- Notification Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-green-100 border-green-500 text-green-700{% else %}bg-red-100 border-red-500 text-red-700{% endif %} border-l-4 p-4 mb-6" role="alert">
+                    <p class="font-bold">{{ message.tags|title }}</p>
+                    <p>{{ message }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% csrf_token %}
+            
+            <!-- Product Name -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-box text-blue-500 mr-2"></i>Product Name
+                </label>
+                {{ form.product_name }}
+            </div>
+
+            <!-- Batch Number -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-hashtag text-blue-500 mr-2"></i>Batch Number
+                </label>
+                {{ form.batch_no }}
+            </div>
+
+            <!-- Quantity -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-sort-numeric-up text-blue-500 mr-2"></i>Quantity
+                </label>
+                {{ form.quantity }}
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Expiry Date
+                </label>
+                {{ form.expiry_date }}
+            </div>
+
+            <!-- Price -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-dollar-sign text-blue-500 mr-2"></i>Price
+                </label>
+                {{ form.price }}
+            </div>
+
+            <!-- Category Dropdown -->
+            <div class="relative">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    <i class="fas fa-tags text-blue-500 mr-2"></i>Drug Class
+                </label>
+                <div class="relative">
+                    {{ form.category }}
+                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-span-2 flex justify-center mt-6">
+                <button class="submit-button text-white font-bold py-3 px-8 rounded-full focus:outline-none focus:shadow-outline" type="submit">
+                    <i class="fas fa-save mr-2"></i> Register Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
